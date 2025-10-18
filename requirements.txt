@@ -1,1 +1,6 @@
 streamlit
+
+plotly
+ortools
+pandas
+numpy
