@@ -186,12 +186,15 @@ for index, job in jobs.iterrows():
             if pd.notna(job[alt]):
                 possible_dropoffs.append(location_to_idx[job[alt]])
         
-        # Add disjunction: the solver must visit exactly one of these locations
-        routing.AddDisjunction([manager.NodeToIndex(n) for n in possible_dropoffs], 1)
-        
-        # Tie the pickup to the group of possible dropoffs
         pickup_index = manager.NodeToIndex(pickup_node)
-        routing.AddPickupAndDelivery(pickup_index, routing.GetDisjunctionIndices(pickup_index)[0])
+        
+        # Create disjunction for dropoffs (solver can pick one)
+        dropoff_indices = [manager.NodeToIndex(n) for n in possible_dropoffs]
+        routing.AddDisjunction(dropoff_indices, 1)
+
+# Link pickup to each dropoff alternative (only one will be active)
+for d_idx in dropoff_indices:
+    routing.AddPickupAndDelivery(pickup_index, d_idx)
 
     else: # LO job
         pickup_node = location_to_idx[job['YARD_BLOCK']]
