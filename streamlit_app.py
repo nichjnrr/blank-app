@@ -69,10 +69,14 @@ def generate_job_data():
     df.to_csv("job_dataset.csv", index=False)
     return df, qc_coords, yard_coords
 
-if __name__ == '__main__':
-    generate_job_data()
-    print("job_dataset.csv generated successfully.")
-    
+import os
+
+# --- 0. Ensure job dataset exists ---
+if not os.path.exists("job_dataset.csv"):
+    st.info("Generating initial dataset...")
+    _, _, _ = generate_job_data()
+    st.success("✅ job_dataset.csv generated successfully!")
+
 # --- 1. Data Loading and UI Controls ---
 @st.cache_data
 def load_data():
@@ -91,6 +95,11 @@ all_locations = {**qc_coords, **yard_coords}
 st.sidebar.header("Simulation Parameters")
 num_agvs = st.sidebar.slider("Number of HTs (AGVs)", 5, 80, 10)
 ht_speed = 10 # seconds per sector as per requirements
+
+if st.sidebar.button("🔁 Regenerate Job Dataset"):
+    generate_job_data()
+    st.success("Dataset regenerated successfully. Reload the page to apply changes.")
+
 
 st.sidebar.info(f"""
 **Objective:** Complete all jobs in the shortest possible time (minimise makespan).
@@ -223,7 +232,7 @@ time_dimension.SetGlobalSpanCostCoefficient(100)
 search_parameters = pywrapcp.DefaultRoutingSearchParameters()
 search_parameters.first_solution_strategy = (
     routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION)
-search_parameters.time_limit.seconds = 15
+search_parameters.time_limit.seconds = 60
 search_parameters.local_search_metaheuristic = (
     routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
 
