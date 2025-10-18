@@ -192,10 +192,6 @@ for index, job in jobs.iterrows():
         dropoff_indices = [manager.NodeToIndex(n) for n in possible_dropoffs]
         routing.AddDisjunction(dropoff_indices, 1)
 
-# Link pickup to each dropoff alternative (only one will be active)
-for d_idx in dropoff_indices:
-    routing.AddPickupAndDelivery(pickup_index, d_idx)
-
     else: # LO job
         pickup_node = location_to_idx[job['YARD_BLOCK']]
         dropoff_node = location_to_idx[job['QC_M']]
